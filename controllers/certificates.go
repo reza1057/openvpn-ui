@@ -109,6 +109,25 @@ func (c *CertificatesController) DisplayImage() {
 	c.Ctx.Output.Body(data)
 }
 
+func (c *CertificatesController) RemoveImage() {
+	imageName := c.Ctx.Input.Param(":imageName")
+	logs.Info("Image name to remove: %s", imageName)
+	imagePath := filepath.Join(state.GlobalCfg.OVConfigPath, "clients/", imageName+".png")
+	// destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "clients", name+".ovpn")
+	//imagePath := "./openvpn/clients/" + imageName + ".png"
+	logs.Info("Image path: %s", imagePath)
+
+	// Check if the image file exists
+	err := os.Remove(imagePath)
+	if err != nil {
+		c.Ctx.Output.SetStatus(404)
+		c.Ctx.WriteString("Image not found")
+		logs.Error("Error removing image file: %v", err)
+		return
+	}
+	c.Ctx.Output.SetStatus(204)
+}
+
 func (c *CertificatesController) showCerts() {
 	path := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/index.txt")
 	certs, err := lib.ReadCerts(path)

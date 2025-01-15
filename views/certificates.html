@@ -353,6 +353,11 @@
 {{end}}
 
 <script>
+  $('.modal').not("#modal-default").on("hide.bs.modal", function (el) {
+    let certificateName = el.currentTarget.id.replace('-modal','');
+    $.post(`/removeimage/${certificateName}`);
+    location.reload();
+  });
 // Attach a click event handler to the "Send Email" button
 $('.send-email-with-qr-btn').on('click', function () {
   var $modal = $(this).closest('.modal');
