@@ -88,7 +88,7 @@ func (c *CertificatesController) Get() {
 func (c *CertificatesController) DisplayImage() {
 	imageName := c.Ctx.Input.Param(":imageName")
 	logs.Info("Image name: %s", imageName)
-	imagePath := filepath.Join(state.GlobalCfg.OVConfigPath, "clients/", imageName+".png")
+	imagePath := filepath.Join("/opt/openvpn/user-data/", imageName+"/", imageName+".png")
 	// destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "clients", name+".ovpn")
 	//imagePath := "./openvpn/clients/" + imageName + ".png"
 	logs.Info("Image path: %s", imagePath)
@@ -112,24 +112,25 @@ func (c *CertificatesController) DisplayImage() {
 func (c *CertificatesController) RemoveImage() {
 	imageName := c.Ctx.Input.Param(":imageName")
 	logs.Info("Image name to remove: %s", imageName)
-	imagePath := filepath.Join(state.GlobalCfg.OVConfigPath, "clients/", imageName+".png")
-	// destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "clients", name+".ovpn")
-	//imagePath := "./openvpn/clients/" + imageName + ".png"
+	imagePath := filepath.Join("/opt/openvpn/user-data", imageName+"/", imageName+".png")
+	passPath := filepath.Join("/opt/openvpn/user-data", imageName+"/pass.txt")
 	logs.Info("Image path: %s", imagePath)
+	logs.Info("Pass path: %s", passPath)
 
 	// Check if the image file exists
 	err := os.Remove(imagePath)
-	if err != nil {
+	err1 := os.Remove(passPath)
+	if err != nil || err1 != nil {
 		c.Ctx.Output.SetStatus(404)
-		c.Ctx.WriteString("Image not found")
-		logs.Error("Error removing image file: %v", err)
-		return
+		c.Ctx.WriteString("Image or pass file not found")
+		logs.Error("Error removing file: %v", err)
+		logs.Error("Error removing file: %v", err1)
 	}
 	c.Ctx.Output.SetStatus(204)
 }
 
 func (c *CertificatesController) showCerts() {
-	path := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/index.txt")
+	path := filepath.Join(state.GlobalCfg.OVConfigPath, "easy-rsa/pki/index.txt")
 	certs, err := lib.ReadCerts(path)
 	if err != nil {
 		logs.Error(err)
@@ -225,15 +226,15 @@ func (c *CertificatesController) Renew() {
 	c.TplName = "certificates.html"
 	flash := web.NewFlash()
 	name := c.GetString(":key")
-	localip := c.GetString(":localip")
+	email := c.GetString(":email")
 	serial := c.GetString(":serial")
 	tfaname := c.GetString(":tfaname")
-	if err := lib.RenewCertificate(name, localip, serial, tfaname); err != nil {
+	if err := lib.RenewCertificate(name, email, serial, tfaname); err != nil {
 		logs.Error(err)
 		//flash.Error(err.Error())
 		//flash.Store(&c.Controller)
 	} else {
-		flash.Success("Success! Certificate for the name \"" + name + "\"  and IP \"" + localip + "\" and Serial \"" + serial + "\" has been renewed")
+		flash.Success("Success! Certificate for the name \"" + name + "\"  and email \"" + email + "\" and Serial \"" + serial + "\" has been renewed")
 		flash.Store(&c.Controller)
 	}
 	c.showCerts()

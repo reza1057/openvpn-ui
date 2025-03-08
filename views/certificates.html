@@ -104,20 +104,20 @@
                   {{end}}
                     <td class="align-middle">
                   {{ if and (eq .Revocation "") (ne .Details.Name "") }}
-                      <a href="{{urlfor "CertificatesController.Renew" ":key" .Details.Name ":localip" .Details.LocalIP ":serial" .Serial ":tfaname" .Details.TFAName}}" class="btn btn-primary btn-xs" title="Renew" style="font-size: 80%;">Renew</a>
+                      <a href="{{urlfor "CertificatesController.Renew" ":key" .Details.Name ":email" .Details.Email}}" class="btn btn-primary btn-xs" title="Renew" style="font-size: 80%;">Renew</a>
                   {{else}}
                       <a class="btn btn-default btn-xs" disabled>Renew</a>
                   {{end}}
 
                   {{ if and (eq .Revocation "") (ne .Details.Name "") }}
-                      <a href="{{urlfor "CertificatesController.Revoke" ":key" .Details.Name ":serial" .Serial ":tfaname" .Details.TFAName}}" class="btn btn-warning btn-xs" title="Revoke" style="font-size: 80%;">Revoke</a>
+                      <a href="{{urlfor "CertificatesController.Revoke" ":key" .Details.Name}}" class="btn btn-warning btn-xs" title="Revoke" style="font-size: 80%;">Revoke</a>
                   {{else}}
                       <a class="btn btn-default btn-xs" disabled>Revoke</a>
                   {{end}}
                   {{ if eq .Revocation ""}}
                       <a class="btn btn-default btn-xs" disabled>Delete</a>
                   {{else}}
-                      <a href="{{urlfor "CertificatesController.Burn" ":key" .Details.CN ":serial" .Serial ":tfaname" .Details.TFAName}}" class="btn btn-danger btn-xs" title="Burn" style="font-size: 80%;">Delete</a>
+                      <a href="{{urlfor "CertificatesController.Burn" ":key" .Details.CN ":serial" .Serial}}" class="btn btn-danger btn-xs" title="Burn" style="font-size: 80%;">Delete</a>
                   {{end}}
                     </td>
               </tr>
@@ -178,6 +178,8 @@
                         </dd>
                         {{end}}
                       </dl>
+                      <dt class="copy-details">Password:</dt>
+                      <dd class="copy-details"><span id="helpBlock" class="text-muted">{{ .Details.Password }}</span></dd>
                       <div class="modal-footer justify-content-between">
                         <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary copy-btn copy-modal-data-btn" style="width: 135px;">Copy</button>

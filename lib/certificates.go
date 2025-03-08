@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -37,6 +38,7 @@ type Details struct {
 	Email            string
 	LocalIP          string
 	TFAName          string
+	Password         string
 }
 
 func ReadCerts(path string) ([]*Cert, error) {
@@ -85,6 +87,7 @@ func parseDetails(d string) *Details {
 				details.Name = fields[1]
 			case "CN":
 				details.CN = fields[1]
+				details.Name = fields[1]
 			case "C":
 				details.Country = fields[1]
 			case "ST":
@@ -108,7 +111,21 @@ func parseDetails(d string) *Details {
 			}
 		}
 	}
+	details.Password = readPassword(details.Name)
 	return details
+}
+
+func readPassword(name string) string {
+	passPath := filepath.Join("/opt/openvpn/user-data/", name+"/pass.txt")
+	logs.Info("Pass path: %s", passPath)
+
+	// Check if the pass file exists
+	data, err := os.ReadFile(passPath)
+	if err != nil {
+		logs.Error("Error reading pass file: %v", err)
+		return ""
+	}
+	return string(data)
 }
 
 func trim(s string) string {
@@ -117,7 +134,7 @@ func trim(s string) string {
 
 func CreateCertificate(name string, staticip string, passphrase string, expiredays string, email string, country string, province string, city string, org string, orgunit string, tfaname string, tfaissuer string) error {
 	logs.Info("Lib: Creating certificate with parameters: name=%s, staticip=%s, passphrase=%s, expiredays=%s, email=%s, country=%s, province=%s, city=%s, org=%s, orgunit=%s, tfaname=%s, tfaissuer=%s", name, staticip, passphrase, expiredays, email, country, province, city, org, orgunit, tfaname, tfaissuer)
-	path := state.GlobalCfg.OVConfigPath + "/pki/index.txt"
+	path := state.GlobalCfg.OVConfigPath + "/easy-rsa/pki/index.txt"
 	haveip := staticip != ""
 	pass := passphrase != ""
 	//logs.Info("Org set to: %v", org)
@@ -146,12 +163,13 @@ func CreateCertificate(name string, staticip string, passphrase string, expireda
 						"export TFA_ISSUER=\"%s\" &&"+
 						"export EASYRSA_CERT_EXPIRE=%s &&"+
 						"export EASYRSA_REQ_EMAIL=%s &&"+
+						"export EASYRSA_REQ_CN=%s &&"+
 						"export EASYRSA_REQ_COUNTRY=%s &&"+
 						"export EASYRSA_REQ_PROVINCE=%s &&"+
 						"export EASYRSA_REQ_CITY=%s &&"+
 						"export EASYRSA_REQ_ORG=%s &&"+
 						"export EASYRSA_REQ_OU=%s &&"+
-						"./genclient.sh %s %s", name, tfaname, tfaissuer, expiredays, email, country, province, city, org, orgunit, name, staticip))
+						"./manage.sh create %s %s", name, tfaname, tfaissuer, expiredays, email, name, country, province, city, org, orgunit, name, email))
 			cmd.Dir = state.GlobalCfg.OVConfigPath
 			output, err := cmd.CombinedOutput()
 			if err != nil {
@@ -251,7 +269,7 @@ func RevokeCertificate(name string, serial string, tfaname string) error {
 			"cd /opt/scripts/ && "+
 				"export KEY_NAME=%s &&"+
 				"export TFA_NAME=%s &&"+
-				"./revoke.sh %s %s", name, tfaname, name, serial))
+				"./manage.sh revoke %s", name, tfaname, name))
 	cmd.Dir = state.GlobalCfg.OVConfigPath
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -294,13 +312,13 @@ func BurnCertificate(CN string, serial string, tfaname string) error {
 	return nil
 }
 
-func RenewCertificate(name string, localip string, serial string, tfaname string) error {
+func RenewCertificate(name string, email string, serial string, tfaname string) error {
 	cmd := exec.Command("/bin/bash", "-c",
 		fmt.Sprintf(
 			"cd /opt/scripts/ && "+
 				"export KEY_NAME=%s &&"+
 				"export TFA_NAME=%s &&"+
-				"./renew.sh %s %s %s", name, tfaname, name, localip, serial))
+				"./manage.sh refresh %s %s", name, tfaname, name, email))
 	cmd.Dir = state.GlobalCfg.OVConfigPath
 	output, err := cmd.CombinedOutput()
 	if err != nil {

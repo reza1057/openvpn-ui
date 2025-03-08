@@ -3,9 +3,7 @@ set_var EASYRSA_REQ_COUNTRY  "{{ .EasyRSAReqCountry }}"
 set_var EASYRSA_REQ_PROVINCE "{{ .EasyRSAReqProvince }}"
 set_var EASYRSA_REQ_CITY     "{{ .EasyRSAReqCity }}"
 set_var EASYRSA_REQ_ORG      "{{ .EasyRSAReqOrg }}"
-set_var EASYRSA_REQ_EMAIL    "{{ .EasyRSAReqEmail }}"
 set_var EASYRSA_REQ_OU       "{{ .EasyRSAReqOu }}"
-set_var EASYRSA_REQ_CN       "{{ .EasyRSAReqCn }}"
 set_var EASYRSA_KEY_SIZE     {{ .EasyRSAKeySize }}
 set_var EASYRSA_CA_EXPIRE    {{ .EasyRSACaExpire }}
 set_var EASYRSA_CERT_EXPIRE  {{ .EasyRSACertExpire }}

@@ -114,7 +114,7 @@ func CreateDefaultOVConfig(configDir string, ovConfigPath string, address string
 	c := OVConfig{
 		Profile: "default",
 		Config: config.Config{
-			FuncMode:                 0, // 0 = standard authentication (cert, cert + password), 1 = 2FA authentication (cert + OTP)
+			FuncMode:                 1, // 0 = standard authentication (cert, cert + password), 1 = 2FA authentication (cert + OTP)
 			Management:               fmt.Sprintf("%s %s", address, network),
 			ScriptSecurity:           "",
 			UserPassVerify:           "",
@@ -176,7 +176,7 @@ func CreateDefaultOVClientConfig(configDir string, ovConfigPath string, address 
 	c := OVClientConfig{
 		Profile: "default",
 		Config: clientconfig.Config{
-			FuncMode:          0, // 0 = standard authentication (cert, cert + password), 1 = 2FA authentication (cert + OTP)
+			FuncMode:          1, // 0 = standard authentication (cert, cert + password), 1 = 2FA authentication (cert + OTP)
 			Device:            "tun",
 			Port:              1194,
 			Proto:             "udp",
@@ -224,16 +224,16 @@ func CreateDefaultEasyRSAConfig(configDir string, easyRSAPath string, address st
 		Profile: "default",
 		Config: easyrsaconfig.Config{
 			EasyRSADN:          "org",
-			EasyRSAReqCountry:  "UA",
-			EasyRSAReqProvince: "KY",
-			EasyRSAReqCity:     "Kyiv",
-			EasyRSAReqOrg:      "SweetHome",
-			EasyRSAReqEmail:    "sweet@home.net",
+			EasyRSAReqCountry:  "IR",
+			EasyRSAReqProvince: "TH",
+			EasyRSAReqCity:     "Tehran",
+			EasyRSAReqOrg:      "Tosan",
+			EasyRSAReqEmail:    "sweet@gmail.com",
 			EasyRSAReqOu:       "MyOrganizationalUnit",
 			EasyRSAReqCn:       "server",
 			EasyRSAKeySize:     2048,
 			EasyRSACaExpire:    3650,
-			EasyRSACertExpire:  825,
+			EasyRSACertExpire:  180,
 			EasyRSACertRenew:   30,
 			EasyRSACrlDays:     180,
 		},
