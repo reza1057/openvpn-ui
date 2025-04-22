@@ -34,7 +34,23 @@ func (c *LogsController) Get() {
 		return
 	}
 
-	fName := settings.OVConfigPath + "/log/openvpn.log"
+	logs := getLogs("/var/log/openvpn/openvpn.log")
+	start := len(logs) - 300 // :P
+	if start < 0 {
+		start = 0
+	}
+	c.Data["logs"] = logs[start:]
+
+	logs_auth := getLogs("/var/log/auth.log")
+	start = len(logs) - 300 // :P
+	if start < 0 {
+		start = 0
+	}
+	c.Data["logs_auth"] = logs_auth[start:]
+	//c.Data["logs"] = reverse(logs[start:])
+}
+
+func getLogs(fName string) []string {
 	file, err := os.Open(fName)
 	if err != nil {
 		logs.Error(err)
@@ -49,12 +65,7 @@ func (c *LogsController) Get() {
 			logs = append(logs, strings.Trim(line, "\t"))
 		}
 	}
-	start := len(logs) - 300 // :P
-	if start < 0 {
-		start = 0
-	}
-	c.Data["logs"] = logs[start:]
-	//c.Data["logs"] = reverse(logs[start:])
+	return logs
 }
 
 //func reverse(lines []string) []string {
