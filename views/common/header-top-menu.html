@@ -15,7 +15,7 @@
         <a href="{{urlfor "SettingsController.Get"}}" class="dropdown-item">OpenVPN UI</a>
       </li>
 
-      <li {{if compare .RouterPattern "/ov/config"}}class="dropdown-item"{{end}}>
+     <!-- <li {{if compare .RouterPattern "/ov/config"}}class="dropdown-item"{{end}}>
         <a href="{{urlfor "OVConfigController.Get"}}" class="dropdown-item">OpenVPN Server</a>
       </li>
 
@@ -29,7 +29,7 @@
 
       <li {{if compare .RouterPattern "/dangerzone"}}class="dropdown-item"{{end}}>
         <a href="{{urlfor "DangerController.Get"}}" class="dropdown-item">Maintenance</a>
-      </li>
+      </li>-->
     </ul>
   </li>
   {{ else }}

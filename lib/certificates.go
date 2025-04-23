@@ -20,6 +20,7 @@ type Cert struct {
 	Expiration  string
 	ExpirationT time.Time
 	IsExpiring  bool
+	IsExpired   bool
 	Revocation  string
 	RevocationT time.Time
 	Serial      string
@@ -56,14 +57,17 @@ func ReadCerts(path string) ([]*Cert, error) {
 					line, 6, len(fields))
 		}
 		expT, _ := time.Parse("060102150405Z", fields[1])
+		expT = expT.In(time.Now().Location())
 		expTA := time.Now().AddDate(0, 0, 30).After(expT) // If cer will expire in 30 days, raise this flag
 		//logs.Debug("ExpirationT: %v, IsExpiring: %v", expT, expTA) // logging
+		expired := time.Now().After(expT)
 		revT, _ := time.Parse("060102150405Z", fields[2])
 		c := &Cert{
 			EntryType:   fields[0],
 			Expiration:  fields[1],
 			ExpirationT: expT,
 			IsExpiring:  expTA,
+			IsExpired:   expired,
 			Revocation:  fields[2],
 			RevocationT: revT,
 			Serial:      fields[3],
@@ -122,7 +126,7 @@ func readPassword(name string) string {
 	// Check if the pass file exists
 	data, err := os.ReadFile(passPath)
 	if err != nil {
-		logs.Error("Error reading pass file: %v", err)
+		logs.Info("Error reading pass file: %v", err)
 		return ""
 	}
 	return string(data)
@@ -161,15 +165,10 @@ func CreateCertificate(name string, staticip string, passphrase string, expireda
 						"export KEY_NAME=%s &&"+
 						"export TFA_NAME=%s &&"+
 						"export TFA_ISSUER=\"%s\" &&"+
+						"export EASYRSA_REQ_CN=%s &&"+
 						"export EASYRSA_CERT_EXPIRE=%s &&"+
 						"export EASYRSA_REQ_EMAIL=%s &&"+
-						"export EASYRSA_REQ_CN=%s &&"+
-						"export EASYRSA_REQ_COUNTRY=%s &&"+
-						"export EASYRSA_REQ_PROVINCE=%s &&"+
-						"export EASYRSA_REQ_CITY=%s &&"+
-						"export EASYRSA_REQ_ORG=%s &&"+
-						"export EASYRSA_REQ_OU=%s &&"+
-						"./manage.sh create %s %s", name, tfaname, tfaissuer, expiredays, email, name, country, province, city, org, orgunit, name, email))
+						"./manage.sh create %s %s", name, tfaname, tfaissuer, name, expiredays, email, name, email))
 			cmd.Dir = state.GlobalCfg.OVConfigPath
 			output, err := cmd.CombinedOutput()
 			if err != nil {
@@ -318,7 +317,8 @@ func RenewCertificate(name string, email string, serial string, tfaname string) 
 			"cd /opt/scripts/ && "+
 				"export KEY_NAME=%s &&"+
 				"export TFA_NAME=%s &&"+
-				"./manage.sh refresh %s %s", name, tfaname, name, email))
+				"export EASYRSA_REQ_EMAIL=%s &&"+
+				"./manage.sh refresh %s %s", name, tfaname, email, name, email))
 	cmd.Dir = state.GlobalCfg.OVConfigPath
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -326,5 +326,6 @@ func RenewCertificate(name string, email string, serial string, tfaname string) 
 		logs.Error(err)
 		return err
 	}
+	BurnCertificate(name, serial, tfaname)
 	return nil
 }

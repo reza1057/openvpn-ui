@@ -98,7 +98,7 @@ func (c *CertificatesController) DisplayImage() {
 	if err != nil {
 		c.Ctx.Output.SetStatus(404)
 		c.Ctx.WriteString("Image not found")
-		logs.Error("Error reading image file: %v", err)
+		logs.Info("Error reading image file: %v", err)
 		return
 	}
 
@@ -123,8 +123,8 @@ func (c *CertificatesController) RemoveImage() {
 	if err != nil || err1 != nil {
 		c.Ctx.Output.SetStatus(404)
 		c.Ctx.WriteString("Image or pass file not found")
-		logs.Error("Error removing file: %v", err)
-		logs.Error("Error removing file: %v", err1)
+		logs.Info("Error removing file: %v", err)
+		logs.Info("Error removing file: %v", err1)
 	}
 	c.Ctx.Output.SetStatus(204)
 }
