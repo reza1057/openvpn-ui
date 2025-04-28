@@ -326,6 +326,5 @@ func RenewCertificate(name string, email string, serial string, tfaname string) 
 		logs.Error(err)
 		return err
 	}
-	BurnCertificate(name, serial, tfaname)
 	return nil
 }
